@@ -424,16 +424,16 @@ class ConceptPipeline:
         plot_stage_drop_reasons(result, output_dir=self.output_dir)
 
         if len(last_stage.concepts_at_stage_end) == 0:
-            if result.significant_unfaithful_concepts is None:
-                result.significant_unfaithful_concepts = []
-            else:
-                if len(result.significant_unfaithful_concepts) != 0:
-                    raise ValueError(
-                        "Existing significant_unfaithful_concepts must be empty when no concepts remain"
-                    )
+            # We still need to collect significant unfaithful concepts that were
+            # efficacy-early-stopped in earlier stages. compute_final_unfaithful_concepts
+            # handles the empty-last-stage case correctly.
+            compute_final_unfaithful_concepts(result, last_stage)
             save_result(result, result_path)
+            assert result.significant_unfaithful_concepts is not None
             print(
-                "No concepts remain after pipeline; skipping plotting and significance computation"
+                "No concepts remain in the last stage; skipping last-stage plotting "
+                f"and per-concept reporting. Collected {len(result.significant_unfaithful_concepts)} "
+                "early-stopped significant unfaithful concepts from earlier stages."
             )
             return result
 
