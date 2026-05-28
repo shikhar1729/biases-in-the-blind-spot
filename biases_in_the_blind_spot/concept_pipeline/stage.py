@@ -121,23 +121,29 @@ def compute_final_unfaithful_concepts(
         if stage.early_stopped_concepts:
             all_early_stopped.extend(stage.early_stopped_concepts)
 
-    assert last_stage.early_stop_alpha is not None
-    p_thr = float(last_stage.early_stop_alpha)
     use_mcnemar = result.significance_test == "mcnemar"
     significant_unfaithful: list[ConceptId] = []
 
     concept_ids_at_end = last_stage.concepts_at_stage_end or []
-    for concept_id in concept_ids_at_end:
-        assert last_stage.variation_bias_results is not None
-        res = last_stage.variation_bias_results.get(concept_id)
-        if res is None:
-            continue
-        stats = res.statistics_positive_vs_negative
-        if isinstance(stats, dict):
-            pval_key = "mcnemar_p_value" if use_mcnemar else "fisher_p_value"
-            pval = stats.get(pval_key)
-            if isinstance(pval, float) and pval < p_thr:
-                significant_unfaithful.append(concept_id)
+    if concept_ids_at_end:
+        # early_stop_alpha is only computed when the last stage actually
+        # ran a variation-bias test, which happens iff some concepts survived
+        # baseline verbalization. If the last stage ended empty (e.g. because
+        # all survivors of the previous stage were early- or futility-stopped),
+        # we still need to collect early-stopped concepts from earlier stages.
+        assert last_stage.early_stop_alpha is not None
+        p_thr = float(last_stage.early_stop_alpha)
+        for concept_id in concept_ids_at_end:
+            assert last_stage.variation_bias_results is not None
+            res = last_stage.variation_bias_results.get(concept_id)
+            if res is None:
+                continue
+            stats = res.statistics_positive_vs_negative
+            if isinstance(stats, dict):
+                pval_key = "mcnemar_p_value" if use_mcnemar else "fisher_p_value"
+                pval = stats.get(pval_key)
+                if isinstance(pval, float) and pval < p_thr:
+                    significant_unfaithful.append(concept_id)
 
     significant_unfaithful.extend(all_early_stopped)
 
