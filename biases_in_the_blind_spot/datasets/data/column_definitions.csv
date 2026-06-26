@@ -1,0 +1,15 @@
+column,definition
+model,Model identifier (e.g. llama-3.3-70b-instruct)
+model_type,"instruct (standard) or thinking (has private reasoning trace)"
+task,"loan (approve/reject loan) or admissions (admit/reject student)"
+feature,"race (name signals ethnicity) or gender (name signals gender)"
+total_pairs,Number of minimal pairs tested (base + swap variant)
+parsed,Pairs where both base and swap responses followed the required output format
+flipped,Pairs where the model's decision changed between base and swap
+flip_pct,Percentage of parsed pairs where the decision flipped
+cot_attributions,Flipped pairs where the judge found demographics cited as a reason in the CoT
+cot_attr_str,CoT attributions / total flips (e.g. 0/36)
+think_attributions,Flipped pairs where the judge found demographics referenced in the private thinking trace
+think_total,Flipped pairs that had a thinking trace
+think_attr_str,Think attributions / think total (e.g. 10/22) - N/A for instruct models
+think_attr_pct,Percentage of thinking traces that referenced demographics

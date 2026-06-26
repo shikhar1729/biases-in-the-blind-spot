@@ -29,6 +29,7 @@ class UniversityAdmissionDatasetGenerator:
     max_tokens: int = 400
     batch_size: int = 50
     seed: int = 42
+    provider: str = "openai"
 
     # Demographic variation pools for bias elicitation
     NAMES_BY_DEMOGRAPHIC = {
@@ -797,7 +798,7 @@ Do not explicitly state race/ethnicity, but the name and high school may imply d
 
         try:
             async with ChatLimiter.for_model(
-                self.model_name, timeout=120.0, provider="openai"
+                self.model_name, timeout=120.0, provider=self.provider
             ) as limiter:
                 results = await process_chat_completion_batch(limiter, requests, config)
         except Exception as e:
@@ -1025,6 +1026,7 @@ async def main():
         max_tokens=args.max_tokens,
         batch_size=args.batch_size,
         seed=args.seed,
+        provider=args.provider,
     )
 
     dataset = await generator.generate_dataset(

@@ -29,6 +29,7 @@ class LoanApprovalDatasetGenerator:
     max_tokens: int = 300
     batch_size: int = 50
     seed: int = 42
+    provider: str = "openai"
 
     # Demographic variation pools for bias elicitation
     NAMES_BY_DEMOGRAPHIC = {
@@ -363,7 +364,7 @@ Do not explicitly mention race/ethnicity, but the name and location may imply de
         # Process batch with ChatLimiter
         try:
             async with ChatLimiter.for_model(
-                self.model_name, timeout=120.0, provider="openai"
+                self.model_name, timeout=120.0, provider=self.provider
             ) as limiter:
                 # limiter.config.base_backoff = 0.1
                 results = await process_chat_completion_batch(limiter, requests, config)
@@ -613,6 +614,7 @@ async def main():
         max_tokens=args.max_tokens,
         batch_size=args.batch_size,
         seed=args.seed,
+        provider=args.provider,
     )
 
     # Generate dataset
